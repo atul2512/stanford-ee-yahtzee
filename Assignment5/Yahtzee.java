@@ -59,6 +59,7 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 		}
 	}
 
+/** Plays a single turn for the current player. */
 	private void doPlayerTurn(int player) {
 		/* Set noReroll flag to false to allow player full number of re-roll opportunities */
 		noReroll = false;
@@ -77,14 +78,14 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 		scoreTurn(category, player);
 	}
 
-	/** Rolls all N_DICE dice and stores the values in a new instance of the array dice */
+/** Rolls all N_DICE dice and stores the values in a new instance of the array dice */
 	private void rollDice() {
 		dice = new int[N_DICE];
 		for (int i = 0; i < N_DICE; i++) {
 			dice[i] = rgen.nextInt(1, 6);
 		}
 	}
-	
+/** Prompts the player to select dice to re-roll and checks to see whether any were selected when the player clicks the re-roll button. */ 
 	private void rollAgain() {
 		display.printMessage("Select the dice you wish to re-roll and click \"Roll Again\".");
 		display.waitForPlayerToSelectDice();
@@ -101,12 +102,35 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 		return false;
 	}
 	
+/** Re-rolls only the selected dice. */
 	private void rerollSelectedDice() {
 		for (int i = 0; i < N_DICE; i++) {
 			if (display.isDieSelected(i)) {
 				dice[i] = rgen.nextInt(1, 6);
 			}
 		}
+	}
+
+/** Prompts the player to select a scoring category. Reprompts if the selected category is not valid. */
+	private int selectCategory() {
+		display.printMessage("Pick a category to score this turn.");
+		while (true) {
+			int category = display.waitForPlayerToSelectCategory();
+			if (checkCategory(dice, category)) {
+				return category;
+			} else display.printMessage("That is not a valid category. Please pick another.");
+		}
+	}
+	
+/** Checks whether the dice values are allowed for the selected category and whether the category has already been used */
+	private boolean checkCategory(int[] dice, int category) {
+		// TODO
+		return false;
+	}
+	
+/** Calculates the score for the turn given the dice values and selected category. Assumes the category is valid. */
+	private void scoreTurn(int category, int player) {
+		// TODO
 	}
 
 	/* Private instance variables */
