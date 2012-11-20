@@ -49,18 +49,21 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 			}
 		}
 	}
-		
+	/* Initializes the score card array to contain -1 in all categories for all players */	
 	private void initScoreCard() {
 		scoreCard = new int[nPlayers][N_CATEGORIES];
 		for (int i = 0; i < scoreCard.length; i++) {
 			for (int j = 0; j < scoreCard[0].length; j++) {
-				scoreCard[i][j] = 0;
+				scoreCard[i][j] = -1;
 			}
 		}
 	}
 
-/** Plays a single turn for the current player. */
+	/** Plays a single turn for the current player. 
+	 * 
+	 * @param player the player number <code>0 &lt; player &lt;= 4</code>*/
 	private void doPlayerTurn(int player) {
+		currentPlayer = player;
 		/* Set noReroll flag to false to allow player full number of re-roll opportunities */
 		noReroll = false;
 		display.printMessage(playerNames[player -1] + "'s turn. Click \"Roll Dice\" button to roll the dice.");
@@ -75,17 +78,17 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 		}
 		/* Time to select a category and score the turn */
 		int category = selectCategory();
-		scoreTurn(category, player);
+		scoreTurn(category);
 	}
 
-/** Rolls all N_DICE dice and stores the values in a new instance of the array dice */
+	/** Rolls all N_DICE dice and stores the values in a new instance of the array dice */
 	private void rollDice() {
 		dice = new int[N_DICE];
 		for (int i = 0; i < N_DICE; i++) {
 			dice[i] = rgen.nextInt(1, 6);
 		}
 	}
-/** Prompts the player to select dice to re-roll and checks to see whether any were selected when the player clicks the re-roll button. */ 
+	/** Prompts the player to select dice to re-roll and checks to see whether any were selected when the player clicks the re-roll button. */ 
 	private void rollAgain() {
 		display.printMessage("Select the dice you wish to re-roll and click \"Roll Again\".");
 		display.waitForPlayerToSelectDice();
@@ -94,7 +97,7 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 			display.displayDice(dice);
 		} else noReroll = true;
 	}
-	
+
 	private boolean areDiceSelected() {
 		for (int i = 0; i < N_DICE; i++) {
 			if (display.isDieSelected(i)) return true;
@@ -102,7 +105,7 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 		return false;
 	}
 	
-/** Re-rolls only the selected dice. */
+	/** Re-rolls only the selected dice. */
 	private void rerollSelectedDice() {
 		for (int i = 0; i < N_DICE; i++) {
 			if (display.isDieSelected(i)) {
@@ -111,25 +114,44 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 		}
 	}
 
-/** Prompts the player to select a scoring category. Reprompts if the selected category is not valid. */
+	/** Prompts the player to select a scoring category. Reprompts if the selected category is not valid.
+	 *  Returns the category number as defined in the YahtzeeConstants class.
+	 *  
+	 *   @return the category number as given in <code>YahtzeeConstants</code> 
+	 */
 	private int selectCategory() {
 		display.printMessage("Pick a category to score this turn.");
 		while (true) {
 			int category = display.waitForPlayerToSelectCategory();
-			if (checkCategory(dice, category)) {
+			if (isCategoryEmpty(category)) {
 				return category;
 			} else display.printMessage("That is not a valid category. Please pick another.");
 		}
 	}
-	
-/** Checks whether the dice values are allowed for the selected category and whether the category has already been used */
+
+	/** Checks whether the player-selected category has already been used.
+	 * 
+	 * @param category category number as given in <code>YahtzeeConstants</code>
+	 * @return <code>true</code> if the category is available and <code>false</code> if it is not 
+ 	 */
+	private boolean isCategoryEmpty(int category) {
+		if (scoreCard[currentPlayer - 1][category] < 0) return true;
+		return false;
+	}
+
+	/** Checks whether the dice values are allowed for the selected category */
 	private boolean checkCategory(int[] dice, int category) {
 		// TODO
 		return false;
 	}
 	
-/** Calculates the score for the turn given the dice values and selected category. Assumes the category is valid. */
-	private void scoreTurn(int category, int player) {
+	/** Calculates the score for the turn given the dice values and selected category. 
+	 *  Assumes the category is allowed. Does not return anything as it updates the displayed
+	 *  score card and scoreCard array directly.
+	 *  
+	 *  @param category the category number as given in <code>YahtzeeConstants</code>
+	 */
+	private void scoreTurn(int category) {
 		// TODO
 	}
 
@@ -141,5 +163,6 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 	private int[] dice; // An array holding the int values of the dice
 	private int[][] scoreCard; // A 2 dimensional array representing the entire score card
 	private boolean noReroll; // A flag to alert the player turn routine that a second re-roll has been declined by the player
+	private int currentPlayer; // The number of the player whose turn it is
 
 }
