@@ -131,28 +131,80 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 
 	/** Checks whether the player-selected category has already been used.
 	 * 
-	 * @param category category number as given in <code>YahtzeeConstants</code>
+	 * @param  category category number as given in <code>YahtzeeConstants</code>
 	 * @return <code>true</code> if the category is available and <code>false</code> if it is not 
  	 */
 	private boolean isCategoryEmpty(int category) {
-		if (scoreCard[currentPlayer - 1][category] < 0) return true;
+		if (scoreCard[currentPlayer - 1][category - 1] < 0) return true;
 		return false;
 	}
 
-	/** Checks whether the dice values are allowed for the selected category */
-	private boolean checkCategory(int[] dice, int category) {
-		// TODO
-		return false;
+	/** Checks whether the dice values are "allowed" for the selected category.
+	 *  Values are "allowed" if they would generate a score higher than zero for that category.
+	 *  
+	 *   @param  category the category number as given in <code>YahtzeeConstants</code>
+	 *   @return <code>true</code> if the dice values are allowed, <code>false</code> otherwise
+	 */
+	private boolean checkCategory(int category) {
+		return YahtzeeMagicStub.checkCategory(dice, category);
+		// TODO Using Stanford-provided pre-compiled magic stub. Need to implement my own solution.
+		
 	}
 	
 	/** Calculates the score for the turn given the dice values and selected category. 
-	 *  Assumes the category is allowed. Does not return anything as it updates the displayed
+	 *  Assumes the category is previously unscored. Does not return anything as it updates the displayed
 	 *  score card and scoreCard array directly.
 	 *  
 	 *  @param category the category number as given in <code>YahtzeeConstants</code>
 	 */
 	private void scoreTurn(int category) {
-		// TODO
+		int score = calculateScore(category);
+		scoreCard[currentPlayer - 1][category - 1] = score;
+		display.updateScorecard(category, currentPlayer, score);
+	}
+
+	private int calculateScore(int category) {
+		boolean scorable = checkCategory(category);
+		if (scorable) {
+			
+			switch (category) {
+			case ONES:
+				return sumDice(1);
+			case TWOS:
+				return sumDice(2);
+			case THREES:
+				return sumDice(3);
+			case FOURS:
+				return sumDice(4);
+			case FIVES:
+				return sumDice(5);
+			case SIXES:
+				return sumDice(6);
+			case THREE_OF_A_KIND:
+				return sumDice(7);
+			case FOUR_OF_A_KIND:
+				return sumDice(7);
+			case FULL_HOUSE:
+				return 25;
+			case SMALL_STRAIGHT:
+				return 30;
+			case LARGE_STRAIGHT:
+				return 40;
+			case YAHTZEE:
+				return 50;
+			case CHANCE:
+				return sumDice(7);
+			default:
+				throw new ErrorException("The selected category doesn't exist!");
+			}
+		} else {
+			return 0;
+		}
+	}
+	
+	
+	private int sumDice(int pips) {
+		
 	}
 
 	/* Private instance variables */
