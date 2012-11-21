@@ -202,9 +202,25 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 		}
 	}
 	
-	
+	/** Adds up some or all of the values on the dice.
+	 *  
+	 *  @param pips the <code>int</code> value of dice that should be included
+	 *  			in the sum returned. A value of 7 means that all dice
+	 *  			should be included.
+	 *  @return the sum of the included dice
+	 */
 	private int sumDice(int pips) {
-		
+		int sum = 0;
+		if (1 <= pips && pips <= 6) {
+			for (int i = 0; i < N_DICE; i++) {
+				if (dice[i] == pips) sum += pips;
+			}
+		} else if (pips == 7) {
+			for (int i = 0; i < N_DICE; i++) {
+				sum += dice[i];
+			}
+		} else throw new ErrorException("Invalid input for sumDice");
+		return sum;
 	}
 
 	/* Private instance variables */
