@@ -29,11 +29,86 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 		}
 	}
 
+	/** Performs game-over tasks: calculate final scores, award bonus points,
+	 * and congratulate the winner by name */
 	private void showGameOver() {
-		// TODO Auto-generated method stub
-		
+		calcUpperAndLower();
+		awardBonus();
+		calcTotal();
+		congratsWinner();
 	}
 	
+	/** Calculates and displays the upper and lower scores */
+	private void calcUpperAndLower() {
+		/* Upper score */
+		for (int i = 0; i < nPlayers; i++) {
+			scoreCard[i][UPPER_SCORE - 1] = 0;
+			for (int j = 0; j < UPPER_SCORE; j++) {
+				scoreCard[i][UPPER_SCORE - 1] += scoreCard[i][j];
+			}
+			display.updateScorecard(UPPER_SCORE, i + 1, scoreCard[i][UPPER_SCORE - 1]);
+		}
+		/* Lower score */
+		for (int i = 0; i < nPlayers; i++) {
+			scoreCard[i][LOWER_SCORE - 1] = 0;
+			for (int j = 9; j < LOWER_SCORE; j++) { // index starts at nine because that is the first category in the lower block
+				scoreCard[i][LOWER_SCORE - 1] += scoreCard[i][j];
+			}
+			display.updateScorecard(LOWER_SCORE, i + 1, scoreCard[i][LOWER_SCORE - 1]);
+		}
+	}
+
+	/** Awards 35 bonus points to each player whose upper score is at least
+	 * 63 and updates the display */
+	private void awardBonus() {
+		for (int i = 0; i < nPlayers; i++) {
+			scoreCard[i][UPPER_BONUS - 1] = 0;
+			if (scoreCard[i][UPPER_SCORE - 1] >= 63) {
+				scoreCard[i][UPPER_BONUS - 1] = 35;
+				display.updateScorecard(UPPER_BONUS, i + 1, 35);
+			}
+		}
+	}
+	
+	/** Calculates and displays each player's total score */
+	private void calcTotal() {
+		for (int i = 0; i < nPlayers; i++) {
+			scoreCard[i][TOTAL - 1] = scoreCard[i][UPPER_SCORE - 1] + scoreCard[i][UPPER_BONUS - 1] + scoreCard[i][LOWER_SCORE - 1];
+			display.updateScorecard(TOTAL, i + 1, scoreCard[i][TOTAL - 1]);
+		}
+	}
+
+	private void congratsWinner() {
+		// TODO Logic to print out who is tied if there is a tie and to print out the winner otherwise
+		/* Initialize local variables to reasonable defaults */
+		boolean tie = false; // No tie detected yet
+		String tiedPlayers = ""; // No tied players detected yet
+		int highScorer = -1; // Normally would use 0, but 0 actually denotes a player. Therefore use a value never used for players.
+		int highScore = 0; // Any score at all will trigger the "highest score yet" logic for the first player
+		
+		/* For each player, check whether player's total score ties or beats the previous highest score */
+		for (int i = 0; i < nPlayers; i++) {
+			/* In the event of a tie, set the tie flag to true and add the player's scoreCard number to 
+			 * the string of tied players at that score */
+			if (scoreCard[i][TOTAL - 1] == highScore) {
+				tie = true;
+				tiedPlayers.concat(Integer.toString(i));
+			/* If the total is the highest yet checked, clear any tie information and set this player and
+			 * total score to be the highest */
+			} else if (scoreCard[i][TOTAL - 1] > highScore) {
+				tie = false;
+				tiedPlayers = "";
+				highScore = scoreCard[i][TOTAL - 1];
+				highScorer = i;
+			}
+		}
+		if (tie) {
+			
+		} else {
+			
+		}
+	}
+
 	private boolean playAgain() {
 		// TODO Auto-generated method stub
 		return false;
