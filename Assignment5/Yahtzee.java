@@ -124,8 +124,12 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 	}
 
 	private boolean playAgain() {
-		// TODO Auto-generated method stub
-		return false;
+		while (true) {
+			String playAgain = readLine("Play again? Y/N: ");
+			if (playAgain.toLowerCase() == "y") return true;
+			else if (playAgain.toLowerCase() == "n") return false;
+			else println("Please enter either Y or N!"); println();
+		}
 	}
 
 	private void playGame() {
