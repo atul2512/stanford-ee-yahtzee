@@ -4,6 +4,8 @@
  * This program will eventually play the Yahtzee game.
  */
 
+import java.util.Arrays;
+
 import acm.io.*;
 import acm.program.*;
 import acm.util.*;
@@ -79,33 +81,45 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 	}
 
 	private void congratsWinner() {
-		// TODO Logic to print out who is tied if there is a tie and to print out the winner otherwise
 		/* Initialize local variables to reasonable defaults */
 		boolean tie = false; // No tie detected yet
-		String tiedPlayers = ""; // No tied players detected yet
+		int[] tiedPlayers = new int[nPlayers]; // Create array to hold numbers of players tied for highest score
+		Arrays.fill(tiedPlayers, -1); // Fill tiedPlayers array with a number that can never be a player number
 		int highScorer = -1; // Normally would use 0, but 0 actually denotes a player. Therefore use a value never used for players.
 		int highScore = 0; // Any score at all will trigger the "highest score yet" logic for the first player
 		
 		/* For each player, check whether player's total score ties or beats the previous highest score */
 		for (int i = 0; i < nPlayers; i++) {
 			/* In the event of a tie, set the tie flag to true and add the player's scoreCard number to 
-			 * the string of tied players at that score */
+			 * the array of tied players at that score */
 			if (scoreCard[i][TOTAL - 1] == highScore) {
 				tie = true;
-				tiedPlayers.concat(Integer.toString(i));
+				Arrays.sort(tiedPlayers); // Puts all of the "empty" (i.e., -1) array components at the front
+				tiedPlayers[0] = i; // Stores the tied player's number in the array
 			/* If the total is the highest yet checked, clear any tie information and set this player and
 			 * total score to be the highest */
 			} else if (scoreCard[i][TOTAL - 1] > highScore) {
-				tie = false;
-				tiedPlayers = "";
+				tie = false; // Set tie flag to show that there is no tie for highest score
+				Arrays.fill(tiedPlayers,  -1); // Reset tiedPlayers array to show no one currently tied for highest score
 				highScore = scoreCard[i][TOTAL - 1];
 				highScorer = i;
 			}
 		}
 		if (tie) {
-			
+			String tieMessage = "There was a tie between " + playerNames[highScorer] + " and";
+			Arrays.sort(tiedPlayers);
+			for (int i = tiedPlayers.length - 1; i >= 0; i--) { // Loop through tiedPlayers backwards
+				if (tiedPlayers[i] < 0) break; // Stop loop when it gets to the part where the array is all -1 to the beginning thanks to the sort
+				tieMessage += " " + playerNames[tiedPlayers[i]] + " and";
+			}
+			int lastAnd = tieMessage.lastIndexOf(" and"); // Find the last " and" to remove it
+			tieMessage = tieMessage.substring(0, lastAnd); // Remove last " and"
+			tieMessage += "! They each had a score of " + highScore + ".";
+			display.printMessage(tieMessage);
 		} else {
-			
+			String winningPlayerName = playerNames[highScorer];
+			int winningPlayerScore = scoreCard[highScorer][TOTAL - 1];
+			display.printMessage("Congratulations, " + winningPlayerName + "! You won with " + winningPlayerScore + " points.");
 		}
 	}
 
