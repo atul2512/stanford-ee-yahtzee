@@ -45,7 +45,7 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 		/* Upper score */
 		for (int i = 0; i < nPlayers; i++) {
 			scoreCard[i][UPPER_SCORE - 1] = 0;
-			for (int j = 0; j < UPPER_SCORE; j++) {
+			for (int j = 0; j < UPPER_SCORE - 1; j++) {
 				scoreCard[i][UPPER_SCORE - 1] += scoreCard[i][j];
 			}
 			display.updateScorecard(UPPER_SCORE, i + 1, scoreCard[i][UPPER_SCORE - 1]);
@@ -53,7 +53,7 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 		/* Lower score */
 		for (int i = 0; i < nPlayers; i++) {
 			scoreCard[i][LOWER_SCORE - 1] = 0;
-			for (int j = 9; j < LOWER_SCORE; j++) { // index starts at nine because that is the first category in the lower block
+			for (int j = THREE_OF_A_KIND - 1; j < LOWER_SCORE - 1; j++) { // index starts at THREE_OF_A_KIND -1 because that is the first category in the lower block
 				scoreCard[i][LOWER_SCORE - 1] += scoreCard[i][j];
 			}
 			display.updateScorecard(LOWER_SCORE, i + 1, scoreCard[i][LOWER_SCORE - 1]);
@@ -124,11 +124,11 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 	}
 
 	private boolean playAgain() {
+		IODialog dialog = getDialog();
 		while (true) {
-			String playAgain = readLine("Play again? Y/N: ");
-			if (playAgain.toLowerCase() == "y") return true;
-			else if (playAgain.toLowerCase() == "n") return false;
-			else println("Please enter either Y or N!"); println();
+			String playAgain = dialog.readLine("Play again? Y/N: ");
+			if (playAgain.equalsIgnoreCase("y")) return true;
+			else if (playAgain.equalsIgnoreCase("n")) return false;
 		}
 	}
 
