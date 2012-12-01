@@ -241,6 +241,39 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 	 *   @return <code>true</code> if the dice values are allowed, <code>false</code> otherwise
 	 */
 	private boolean checkCategory(int category) {
+		/* This method monkeys around quite a bit with the dice array, so it uses a copy instead
+		 * of the array used elsewhere to track the actual dice. The first change to the array is
+		 * to sort it so that it will be easier to iterate over to see what is in there.
+		 */
+		int[] diceCopy = Arrays.copyOf(dice, N_DICE);
+		Arrays.sort(diceCopy);
+		
+		if (category == ONES || category == TWOS || category == THREES || category == FOURS || 
+				category == FIVES || category == SIXES || category == CHANCE) return true;
+		
+		/* Checking for n of a kind is basically same for any n, so only one block is required for
+		 * three of a kind, four of a kind, and Yahtzee (five of a kind). The counter variable 
+		 * keeps track of how many dice in the array have the value currently stored in the matching
+		 * variable. The counter never goes below 1 because there is always at least one die
+		 * matching itself stored in matching.
+		 */
+		else if (category == THREE_OF_A_KIND || category == FOUR_OF_A_KIND || category == YAHTZEE) {
+			int counter = 1; // How many dice match
+			int matching = diceCopy[0]; // What value of die is currently being counted by counter
+			for (int i = 1; i < N_DICE; i++) { // Start at 1 because the first die always matches itself
+				if (diceCopy[i] == matching) { // Increment the counter if the current index die is the same as the value of matching
+					counter++;
+				} else { // Reset the counter to 1 and matching to the current die if the current die does not match the previous one
+					counter = 1;
+					matching = diceCopy[i];
+				}
+			}
+			/* Check to see whether the counter is at least as high as the number of a kind under consideration */
+			if ((category == THREE_OF_A_KIND && counter >= 3) || (category == FOUR_OF_A_KIND && counter >= 4) ||
+					(category == YAHTZEE && counter == 5)) return true;
+			else return false; 
+		}
+		
 		return YahtzeeMagicStub.checkCategory(dice, category);
 		// TODO Using Stanford-provided pre-compiled magic stub. Need to implement my own solution.
 		
@@ -294,6 +327,7 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 			default:
 				throw new ErrorException("The selected category doesn't exist!");
 			}
+			
 		} else {
 			return 0;
 		}
