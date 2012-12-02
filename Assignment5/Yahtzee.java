@@ -77,13 +77,6 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 	
 	/** Calculates and displays each player's total score */
 	private void calcTotal() {
-		if (cheatMode) {
-			IODialog dialog = getDialog();
-			for (int i = 0; i < nPlayers; i++) {
-				scoreCard[i][TOTAL - 1] = dialog.readInt("Enter total score for " + playerNames[i]);
-				display.updateScorecard(TOTAL, i + 1, scoreCard[i][TOTAL - 1]);
-			}
-		}
 		for (int i = 0; i < nPlayers; i++) {
 			scoreCard[i][TOTAL - 1] = scoreCard[i][UPPER_SCORE - 1] + scoreCard[i][UPPER_BONUS - 1] + scoreCard[i][LOWER_SCORE - 1];
 			display.updateScorecard(TOTAL, i + 1, scoreCard[i][TOTAL - 1]);
