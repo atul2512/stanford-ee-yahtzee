@@ -1,1 +1,7 @@
-This is my implementation of Yahtzee for Assignment 5 in Stanford's Engineering Everywhere CS106a course. It is currently incomplete, although it is working.
+This is my implementation of Yahtzee for Assignment 5 in Stanford's Engineering Everywhere [CS106a](http://see.stanford.edu/see/courseinfo.aspx?coll=824a47e1-135f-4508-a5aa-866adcae1111) course. It is played according to [standard Yahtzee rules](http://en.wikipedia.org/wiki/Yahtzee#Rules_overview), although I have chosen not to implement the "Yahtzee as a wild" and bonus points for Yahtzees beyond the first (it was not part of the spec for the assignment).
+
+`Yahtzee.java` is my code, except for the `main` method and the first few lines of the `run` method. Those parts and all other source and resources were provided by Stanford as part of the course materials.
+
+One suggestion that the Stanford assignment handout suggested was implementing a "cheat" mode for testing purposes. Normally, testing code like that would be removed after testing is complete, but I have decided to leave mine in as does not change the presentation of the game at all if it is not activated. Cheat mode in my implementation can be turned on by naming Player 1 `dirtycheater`. This will allow you to set the values of all dice instead of randomly determining them. Note that there are no re-rolls in cheat mode, as I assume that you have set the dice to your preferred values the first time. Therefore, after all five dice have been entered, you must immediately select the scoring category. Play then passes to the next player, who will enter her preferred dice values.
+
+Have fun!
