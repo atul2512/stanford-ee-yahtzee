@@ -285,6 +285,21 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 			else return false; 
 		}
 		
+		/* Checking for a full house is equivalent to checking for two of a kind and three of a kind.
+		 * This block accomplishes this by checking the two possible numerically sorted dice 
+		 * configurations for a full house: first three match and last two match OR first two match and
+		 * last three match.   
+		 */
+		else if (category == FULL_HOUSE) {
+			/* Check XXXYY pattern */
+			if (diceCopy[0] == diceCopy[1] && diceCopy[1] == diceCopy[2] && 
+					diceCopy[3] == diceCopy[4]) return true;
+			/* Check XXYYY pattern */
+			else if (diceCopy[0] == diceCopy[1] && 
+					diceCopy[2] == diceCopy[3] && diceCopy[3] == diceCopy[4]) return true;
+			else return false;
+		}
+		
 		else return YahtzeeMagicStub.checkCategory(dice, category);
 		// TODO Using Stanford-provided pre-compiled magic stub. Need to implement my own solution.
 		
