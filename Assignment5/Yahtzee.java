@@ -1,7 +1,7 @@
 /*
  * File: Yahtzee.java
  * ------------------
- * This program will eventually play the Yahtzee game.
+ * This program plays the Yahtzee game.
  */
 
 import java.util.Arrays;
@@ -28,8 +28,8 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 				playerNames[i - 1] = dialog.readLine("Enter name for player " + i);
 			}
 			display = new YahtzeeDisplay(getGCanvas(), playerNames);
-			if (playerNames[0].equals("dirtycheater")) cheatMode = true;
-			else cheatMode = false;
+			if (playerNames[0].equals("dirtycheater")) cheatMode = true; // Enable cheat mode!
+			else cheatMode = false; // Or not...
 			playGame();
 			showGameOver();
 			if (!playAgain()) break;
@@ -85,7 +85,11 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 			display.updateScorecard(TOTAL, i + 1, scoreCard[i][TOTAL - 1]);
 		}
 	}
-
+	
+	/** Displays an appropriate message at the end of the game, congratulating
+	 *  the winner and announcing their score, or announcing that there is a
+	 *  tie, who is tied, and what their scores are
+	 */
 	private void congratsWinner() {
 		/* Initialize local variables to reasonable defaults */
 		boolean tie = false; // No tie detected yet
@@ -112,6 +116,7 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 			}
 		}
 		if (tie) {
+			/* The message for a tie is complicated, so it is built up piece by piece before being displayed */
 			String tieMessage = "There was a tie between " + playerNames[highScorer] + " and";
 			Arrays.sort(tiedPlayers);
 			for (int i = tiedPlayers.length - 1; i >= 0; i--) { // Loop through tiedPlayers backwards
@@ -122,13 +127,19 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 			tieMessage = tieMessage.substring(0, lastAnd); // Remove last " and"
 			tieMessage += "! They each had a score of " + highScore + ".";
 			display.printMessage(tieMessage);
-		} else {
+		} else { // Display the winning player name and score
 			String winningPlayerName = playerNames[highScorer];
 			int winningPlayerScore = scoreCard[highScorer][TOTAL - 1];
 			display.printMessage("Congratulations, " + winningPlayerName + "! You won with " + winningPlayerScore + " points.");
 		}
 	}
 
+	/** Asks whether the player would like to start a new game. Will keep
+	 *  asking until it gets either a "y" or "n" (ignoring case).
+	 *  
+	 * @return 	<code>true</code> if "y" is entered or <code>false</code> if
+	 * 			"n" is entered
+	 */
 	private boolean playAgain() {
 		IODialog dialog = getDialog();
 		while (true) {
@@ -138,6 +149,10 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 		}
 	}
 
+	/** Controls the flow of the game. Each player gets a turn during each
+	 *  round and there are as many rounds as there are scoring categories
+	 *  (traditionally 13).
+	 */
 	private void playGame() {
 		initScoreCard();
 		/* Use the number of scoring categories to determine how many rounds the game should go */
@@ -148,6 +163,8 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 			}
 		}
 	}
+	
+	/** Initializes the score card at the beginning of the game */
 	/* Initializes the score card array to contain -1 in all categories for all players */	
 	private void initScoreCard() {
 		scoreCard = new int[nPlayers][N_CATEGORIES];
@@ -190,14 +207,17 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 		scoreTurn(category);
 	}
 
-	/** Rolls all N_DICE dice and stores the values in a new instance of the array dice */
+	/** Rolls all N_DICE dice and stores the values for later use */
 	private void rollDice() {
-		dice = new int[N_DICE];
+		dice = new int[N_DICE]; // Use an array to store the dice values
 		for (int i = 0; i < N_DICE; i++) {
 			dice[i] = rgen.nextInt(1, 6);
 		}
 	}
-	/** Prompts the player to select dice to re-roll and checks to see whether any were selected when the player clicks the re-roll button. */ 
+	
+	/** Prompts the player to select dice to re-roll and checks to see whether
+	 *  any were selected when the player clicks the re-roll button. 
+	 */ 
 	private void rollAgain() {
 		display.printMessage("Select the dice you wish to re-roll and click \"Roll Again\".");
 		display.waitForPlayerToSelectDice();
@@ -207,6 +227,7 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 		} else noReroll = true;
 	}
 
+	/** Detects whether the player has selected any dice for re-roll */
 	private boolean areDiceSelected() {
 		for (int i = 0; i < N_DICE; i++) {
 			if (display.isDieSelected(i)) return true;
@@ -224,7 +245,7 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 	}
 
 	/** Prompts the player to select a scoring category. Reprompts if the selected category is not valid.
-	 *  Returns the category number as defined in the YahtzeeConstants class.
+	 *  Returns the category number as defined in the <code>YahtzeeConstants</code> class.
 	 *  
 	 *   @return the category number as given in <code>YahtzeeConstants</code> 
 	 */
@@ -249,7 +270,8 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 	}
 
 	/** Checks whether the dice values are "allowed" for the selected category.
-	 *  Values are "allowed" if they would generate a score higher than zero for that category.
+	 *  Values are "allowed" if they could generate a score higher than zero for that category.
+	 *  However, the categories <code>ONES</code>, <code>TWOS</code>, etc. and <code>CHANCE</code> are always allowed.
 	 *  
 	 *   @param  category the category number as given in <code>YahtzeeConstants</code>
 	 *   @return <code>true</code> if the dice values are allowed, <code>false</code> otherwise
@@ -389,6 +411,12 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 		display.updateScorecard(TOTAL, currentPlayer, scoreCard[currentPlayer -1][TOTAL - 1]);
 	}
 
+	/** Calculates the score for the current turn based on the values of the
+	 * and the player-selected category
+	 * 
+	 * @param category the category number as given by <code>YahtzeeConstants</code>
+	 * @return the score in points
+	 */
 	private int calculateScore(int category) {
 		boolean scorable = checkCategory(category);
 		if (scorable) {
