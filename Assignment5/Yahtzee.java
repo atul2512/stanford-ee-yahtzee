@@ -11,11 +11,11 @@ import acm.program.*;
 import acm.util.*;
 
 public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
-	
+
 	public static void main(String[] args) {
 		new Yahtzee().start(args);
 	}
-	
+
 	public void run() {
 		while (true) {
 			IODialog dialog = getDialog();
@@ -45,7 +45,7 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 		calcTotal();
 		congratsWinner();
 	}
-	
+
 	/** Calculates and displays the upper and lower scores */
 	private void calcUpperAndLower() {
 		/* Upper score */
@@ -77,7 +77,7 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 			}
 		}
 	}
-	
+
 	/** Calculates and displays each player's total score */
 	private void calcTotal() {
 		for (int i = 0; i < nPlayers; i++) {
@@ -93,7 +93,7 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 		Arrays.fill(tiedPlayers, -1); // Fill tiedPlayers array with a number that can never be a player number
 		int highScorer = -1; // Normally would use 0, but 0 actually denotes a player. Therefore use a value never used for players.
 		int highScore = 0; // Any score at all will trigger the "highest score yet" logic for the first player
-		
+
 		/* For each player, check whether player's total score ties or beats the previous highest score */
 		for (int i = 0; i < nPlayers; i++) {
 			/* In the event of a tie, set the tie flag to true and add the player's scoreCard number to 
@@ -102,8 +102,8 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 				tie = true;
 				Arrays.sort(tiedPlayers); // Puts all of the "empty" (i.e., -1) array components at the front
 				tiedPlayers[0] = i; // Stores the tied player's number in the array
-			/* If the total is the highest yet checked, clear any tie information and set this player and
-			 * total score to be the highest */
+				/* If the total is the highest yet checked, clear any tie information and set this player and
+				 * total score to be the highest */
 			} else if (scoreCard[i][TOTAL - 1] > highScore) {
 				tie = false; // Set tie flag to show that there is no tie for highest score
 				Arrays.fill(tiedPlayers,  -1); // Reset tiedPlayers array to show no one currently tied for highest score
@@ -213,7 +213,7 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 		}
 		return false;
 	}
-	
+
 	/** Re-rolls only the selected dice. */
 	private void rerollSelectedDice() {
 		for (int i = 0; i < N_DICE; i++) {
@@ -242,7 +242,7 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 	 * 
 	 * @param  category category number as given in <code>YahtzeeConstants</code>
 	 * @return <code>true</code> if the category is available and <code>false</code> if it is not 
- 	 */
+	 */
 	private boolean isCategoryEmpty(int category) {
 		if (scoreCard[currentPlayer - 1][category - 1] < 0) return true;
 		return false;
@@ -261,10 +261,10 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 		 */
 		int[] diceCopy = Arrays.copyOf(dice, N_DICE);
 		Arrays.sort(diceCopy);
-		
+
 		if (category == ONES || category == TWOS || category == THREES || category == FOURS || 
 				category == FIVES || category == SIXES || category == CHANCE) return true;
-		
+
 		/* Checking for n of a kind is basically same for any n, so only one block is required for
 		 * three of a kind, four of a kind, and Yahtzee (five of a kind). The counter variable 
 		 * keeps track of how many dice in the array have the value currently stored in the matching
@@ -274,20 +274,22 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 		else if (category == THREE_OF_A_KIND || category == FOUR_OF_A_KIND || category == YAHTZEE) {
 			int counter = 1; // How many dice match
 			int matching = diceCopy[0]; // What value of die is currently being counted by counter
+			int maxCounter = 0; // The highest value the counter has reached
 			for (int i = 1; i < N_DICE; i++) { // Start at 1 because the first die always matches itself
 				if (diceCopy[i] == matching) { // Increment the counter if the current index die is the same as the value of matching
 					counter++;
-				} else { // Reset the counter to 1 and matching to the current die if the current die does not match the previous one
+				} else { // Set maxCounter to counter, reset the counter to 1 and matching to the current die
+					maxCounter = counter;
 					counter = 1;
 					matching = diceCopy[i];
 				}
 			}
 			/* Check to see whether the counter is at least as high as the number of a kind under consideration */
-			if ((category == THREE_OF_A_KIND && counter >= 3) || (category == FOUR_OF_A_KIND && counter >= 4) ||
-					(category == YAHTZEE && counter == 5)) return true;
+			if ((category == THREE_OF_A_KIND && maxCounter >= 3) || (category == FOUR_OF_A_KIND && maxCounter >= 4) ||
+					(category == YAHTZEE && maxCounter == 5)) return true;
 			else return false; 
 		}
-		
+
 		/* Checking for a full house is equivalent to checking for two of a kind and three of a kind.
 		 * This block accomplishes this by checking the two possible numerically sorted dice 
 		 * configurations for a full house: first three match and last two match OR first two match and
@@ -302,7 +304,62 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 					diceCopy[2] == diceCopy[3] && diceCopy[3] == diceCopy[4]) return true;
 			else return false;
 		}
-		
+
+		/* To check for a small straight, the first step is to remove all the duplicates from the dice
+		 * array. If there are fewer than 4 dice left, it can't be a small straight. If there are more
+		 * than 4 dice left, they can be checked for sequence similarly to a large straight. However, 
+		 * once the duplicates are removed, either the lowest four or highest four dice must be a
+		 * straight (this will be all the dice both times if there was a duplicate). Therefore, this
+		 * block checks all the dice for a straight if there are four remaining and checks both the
+		 * lower four and higher four if there were no duplicates and five dice remain. 
+		 */
+		else if (category == SMALL_STRAIGHT) {
+			/* Check for, count, and catalog duplicates */
+			int nDupes = 0;
+			int dupe = -1;
+			int[] noDupes;
+			for (int i = 1; i < N_DICE; i++) { // Start at 1 because we are always checking if diceCopy[i] equals diceCopy[i-1]
+				if (diceCopy[i] == diceCopy[i - 1]) {
+					nDupes++;
+					dupe = i;
+				}
+			}
+			
+			/* If there is exactly one duplicate, copy the non-duplicate dice into a new array of length 4 */
+			if (nDupes == 1) {
+				noDupes = new int[4];
+				noDupes[0] = diceCopy[0];
+				for (int i = 1; i < N_DICE; i++) {
+					if (i == dupe) continue;
+					else if (i < dupe) noDupes[i] = diceCopy[i];
+					else if (i > dupe) noDupes[i - 1] = diceCopy[i]; 
+				}
+				/* The 4 long array must be a perfect straight, so just check it like a large straight */
+				for (int i = 1; i < noDupes.length; i++) {
+					if (noDupes[i] != noDupes[i - 1] + 1) return false;
+					if (i == noDupes.length - 1) return true;
+				}
+				return false;
+			}
+			/* If there are no duplicates, either the first four or the last four (or both) must be a 
+			 * straight. Check both of those, and return false if it fails both.
+			 */
+			else if (nDupes == 0) {
+				noDupes = Arrays.copyOf(diceCopy, N_DICE);
+				for (int i = 1; i < noDupes.length - 1; i++) {
+					if (noDupes[i] != noDupes[i - 1] + 1) break;
+					if (i == noDupes.length - 2) return true;
+				}
+				for (int i = 2; i < noDupes.length; i++) {
+					if (noDupes[i] != noDupes[i - 1] + 1) break;
+					if (i == noDupes.length - 1) return true;
+				}
+				return false;
+			}
+			/* If there is not one duplicate and not zero duplicates, then there cannot be a small straight */
+			else return false;
+		}
+
 		/* For a large straight, all five sorted dice must be sequential. This block check that by
 		 * iterating over the dice values and checking whether each one is one higher than the previous.
 		 */
@@ -314,11 +371,10 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 			return false;
 		}
 		
-		else return YahtzeeMagicStub.checkCategory(dice, category);
-		// TODO Using Stanford-provided pre-compiled magic stub. Need to implement my own solution.
-		
+		/* This should never happen. Something is badly wrong in another method if it does. */
+		else throw new ErrorException("That category doesn't exist!");
 	}
-	
+
 	/** Calculates the score for the turn given the dice values and selected category. 
 	 *  Assumes the category is previously unscored. Does not return anything as it updates the displayed
 	 *  score card and scoreCard array directly.
@@ -336,7 +392,7 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 	private int calculateScore(int category) {
 		boolean scorable = checkCategory(category);
 		if (scorable) {
-			
+
 			switch (category) {
 			case ONES:
 				return sumDice(1);
@@ -367,12 +423,12 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 			default:
 				throw new ErrorException("The selected category doesn't exist!");
 			}
-			
+
 		} else {
 			return 0;
 		}
 	}
-	
+
 	/** Adds up some or all of the values on the dice.
 	 *  
 	 *  @param pips the <code>int</code> value of dice that should be included
