@@ -19,7 +19,10 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 	public void run() {
 		while (true) {
 			IODialog dialog = getDialog();
-			nPlayers = dialog.readInt("Enter number of players");
+			while (true) {
+				nPlayers = dialog.readInt("Enter number of players (1-4)");
+				if (1 <= nPlayers && nPlayers <= 4) break; // error-checking to make sure the number of players is valid
+			}
 			playerNames = new String[nPlayers];
 			for (int i = 1; i <= nPlayers; i++) {
 				playerNames[i - 1] = dialog.readLine("Enter name for player " + i);
@@ -298,6 +301,17 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 			else if (diceCopy[0] == diceCopy[1] && 
 					diceCopy[2] == diceCopy[3] && diceCopy[3] == diceCopy[4]) return true;
 			else return false;
+		}
+		
+		/* For a large straight, all five sorted dice must be sequential. This block check that by
+		 * iterating over the dice values and checking whether each one is one higher than the previous.
+		 */
+		else if (category == LARGE_STRAIGHT) {
+			for (int i = 1; i < N_DICE; i++) {
+				if (diceCopy[i] != diceCopy[i - 1] + 1) break;
+				if (i == N_DICE - 1) return true;
+			}
+			return false;
 		}
 		
 		else return YahtzeeMagicStub.checkCategory(dice, category);
