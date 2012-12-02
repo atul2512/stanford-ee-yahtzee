@@ -25,6 +25,8 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 				playerNames[i - 1] = dialog.readLine("Enter name for player " + i);
 			}
 			display = new YahtzeeDisplay(getGCanvas(), playerNames);
+			if (playerNames[0].equals("dirtycheater")) cheatMode = true;
+			else cheatMode = false;
 			playGame();
 			showGameOver();
 			if (!playAgain()) break;
@@ -75,6 +77,13 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 	
 	/** Calculates and displays each player's total score */
 	private void calcTotal() {
+		if (cheatMode) {
+			IODialog dialog = getDialog();
+			for (int i = 0; i < nPlayers; i++) {
+				scoreCard[i][TOTAL - 1] = dialog.readInt("Enter total score for " + playerNames[i]);
+				display.updateScorecard(TOTAL, i + 1, scoreCard[i][TOTAL - 1]);
+			}
+		}
 		for (int i = 0; i < nPlayers; i++) {
 			scoreCard[i][TOTAL - 1] = scoreCard[i][UPPER_SCORE - 1] + scoreCard[i][UPPER_BONUS - 1] + scoreCard[i][LOWER_SCORE - 1];
 			display.updateScorecard(TOTAL, i + 1, scoreCard[i][TOTAL - 1]);
@@ -160,17 +169,26 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 	private void doPlayerTurn(int player) {
 		currentPlayer = player;
 		/* Set noReroll flag to false to allow player full number of re-roll opportunities */
-		noReroll = false;
-		display.printMessage(playerNames[player -1] + "'s turn. Click \"Roll Dice\" button to roll the dice.");
-		display.waitForPlayerToClickRoll(player);
-		rollDice();
+		if (!cheatMode) {
+			noReroll = false;
+			display.printMessage(playerNames[player -1] + "'s turn. Click \"Roll Dice\" button to roll the dice.");
+			display.waitForPlayerToClickRoll(player);
+			rollDice();
+		}
+		if (cheatMode) {
+			noReroll = true;
+			dice = new int[N_DICE];
+			IODialog dialog = getDialog();
+			for (int i = 0; i < N_DICE; i++) {
+				dice[i] = dialog.readInt("Enter value for die " + (i + 1));
+			}
+		}
 		display.displayDice(dice);
 		/* Begin re-roll sequence */
-		rollAgain();
+		/* First re-roll will always take place unless cheatMode is true */
+		if (!noReroll) rollAgain();
 		/* Only do second re-roll if the noReroll flag is set to false */
-		if (!noReroll) {
-			rollAgain();
-		}
+		if (!noReroll) rollAgain();
 		/* Time to select a category and score the turn */
 		int category = selectCategory();
 		scoreTurn(category);
@@ -274,7 +292,7 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 			else return false; 
 		}
 		
-		return YahtzeeMagicStub.checkCategory(dice, category);
+		else return YahtzeeMagicStub.checkCategory(dice, category);
 		// TODO Using Stanford-provided pre-compiled magic stub. Need to implement my own solution.
 		
 	}
@@ -363,5 +381,6 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 	private int[][] scoreCard; // A 2 dimensional array representing the entire score card
 	private boolean noReroll; // A flag to alert the player turn routine that a second re-roll has been declined by the player
 	private int currentPlayer; // The number of the player whose turn it is
+	private boolean cheatMode; // Tracks whether cheat mode (for testing!) is on
 
 }
